@@ -1,36 +1,31 @@
 #!/usr/bin/python3
-""" this module contains a script that starts a Flask web application
-    the web application must be listening on 0.0.0.0, port 5000
-    Routes: - /hbnb_filters """
-from models import *
-from models.base_model import BaseModel, Base
-from models.user import User
-from models.place import Place
+"""Start web application with two routings
+"""
+
+from models import storage
 from models.state import State
-from models.city import City
 from models.amenity import Amenity
-from models.review import Review
 from flask import Flask, render_template
 app = Flask(__name__)
 
 
-classes = {"Amenity": Amenity, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
-
-
-@app.route('/hbnb_filters', strict_slashes=False)
+@app.route('/hbnb_filters')
 def hbnb_filters():
-    """ hbnb_filters method: display HTML page state & city from DBStorage """
-    states = storage.all(State).values()
-    ameninities = storage.all(Amenity).values()
-    return (render_template('10-hbnb_filters.html', states=states,
-                            amenities=ameninities))
+    """Render template with states
+    """
+    path = '10-hbnb_filters.html'
+    states = storage.all(State)
+    amenities = storage.all(Amenity)
+    return render_template(path, states=states, amenities=amenities)
 
 
 @app.teardown_appcontext
-def remove_SQLalc_session(exception):
-    """ close storage when tear down is called """
+def app_teardown(arg=None):
+    """Clean-up session
+    """
     storage.close()
 
+
 if __name__ == '__main__':
+    app.url_map.strict_slashes = False
     app.run(host='0.0.0.0', port=5000)
